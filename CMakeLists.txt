@@ -3,5 +3,7 @@ project( tracking )
 find_package( OpenCV REQUIRED )
 add_executable( tracking src/tracking.cpp )
 target_link_libraries( tracking ${OpenCV_LIBS} )
+add_executable( tracking_previous src/tracking_previous.cpp )
+target_link_libraries( tracking_previous ${OpenCV_LIBS} )
 
 
