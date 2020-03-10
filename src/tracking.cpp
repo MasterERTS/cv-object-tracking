@@ -30,17 +30,21 @@ int main()
 
   cap >> frame;
 
+  // Draw Rectangle with given intervals
   Point point1(24, 44), point2(196, 210);
-
   rectangle(frame, point1, point2, Scalar(0, 0, 255), 1, 8, 0);
   
+  // Create rectangle object to crop from main frame
+  Rect roi = Rect(point1.x, point1.y, point2.x - point1.x, point2.y - point1.y);
+  
+  // Show reference roi
   imshow("Bounding Box", frame);
 
-  Mat img_roi = frame(Rect(point1.x, point1.y, point2.x - point1.x, point2.y - point1.y));
+  // Convert in Grayscale without showing
+  Mat img_roi = frame(roi);
   cvtColor(img_roi, img_roi, CV_RGB2GRAY);
-  
-  imshow("Cropped Bounding Box", img_roi);
 
+  // Wait for key press to start computation
   waitKey(0);
 
   while (1)
@@ -50,8 +54,6 @@ int main()
     Mat grayscale_frame = frame.clone();
 
     cvtColor(frame, grayscale_frame, CV_RGB2GRAY);
-
-    
 
     imshow("Frame", grayscale_frame);
 
@@ -67,7 +69,6 @@ int main()
     
     s_detector->detect(grayscale_frame, keypoints_frame);
     s_detector->compute(grayscale_frame, keypoints_frame, descriptors_frame);
-    
 
     // Matching using FLANN
     FlannBasedMatcher matcher;
@@ -80,15 +81,41 @@ int main()
    
 	imshow("Matches", img_match);
 	
-	waitKey(0);
-	
-   
+	// Get all keypoints that are good matches
+
+    std::vector<Point2f> roi_pts;
+    std::vector<Point2f> frame_pts;
+
+    for( size_t i = 0; i < matches.size(); i++ ) {
+        roi_pts.push_back(keypoints_roi[matches[i].queryIdx].pt);
+        frame_pts.push_back(keypoints_frame[matches[i].trainIdx].pt);
+    }
+
+	// Find homography 
+    Mat homography = findHomography(roi_pts, frame_pts, CV_RANSAC);
+
+    // Get ROI corners ( easy after cropping in the first place )
+    std::vector<Point2f> roi_corners(4);
+    roi_corners[0] = cvPoint(0,0); 
+    roi_corners[1] = cvPoint(img_roi.cols, 0);
+    roi_corners[2] = cvPoint(img_roi.cols, img_roi.rows); 
+    roi_corners[3] = cvPoint(0, img_roi.rows);
+    std::vector<Point2f> frame_corners(4);
+    
+    perspectiveTransform(roi_corners, frame_corners, homography);
+
+    // Draw lines between corners
+    line(img_match, frame_corners[0] + Point2f(img_roi.cols, 0), frame_corners[1] + Point2f(img_roi.cols, 0), Scalar(0, 0, 255), 4);
+    line(img_match, frame_corners[1] + Point2f(img_roi.cols, 0), frame_corners[2] + Point2f(img_roi.cols, 0), Scalar( 0, 0, 255), 4);
+    line(img_match, frame_corners[2] + Point2f(img_roi.cols, 0), frame_corners[3] + Point2f(img_roi.cols, 0), Scalar( 0, 0, 255), 4);
+    line(img_match, frame_corners[3] + Point2f(img_roi.cols, 0), frame_corners[0] + Point2f(img_roi.cols, 0), Scalar( 0, 0, 255), 4);
+
+    //-- Show detected matches
+    imshow( "Matches & Object detection", img_match );
    
     // If the frame is empty, break immediately
-    if (frame.empty())
+    if (frame.empty() or img_match.empty())
       break;
-
-    // Display the resulting frame
 
     // Press  ESC on keyboard to exit
     char c = (char)waitKey(25);
@@ -108,8 +135,9 @@ int main()
 }
 #else
 
+// Used this because I couldn't figure out why it didn't work on my personal computer. It highlighted the problem.
 int main() {
-	cout << "You need the xfeatures2d module to run this program" << endl;
+	std::cout << "You need the xfeatures2d module to run this program" << std::endl;
 }
 
 #endif
