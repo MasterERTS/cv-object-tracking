@@ -109,7 +109,7 @@ int main()
 #else
 
 int main() {
-	cout << "You need the xfeatures2d module to run this program" << endl;
+	std::cout << "You need the xfeatures2d module to run this program" << std::endl;
 }
 
 #endif
