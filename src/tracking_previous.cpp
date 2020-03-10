@@ -44,12 +44,12 @@ int main()
   Mat img_roi = frame(roi);
   cvtColor(img_roi, img_roi, CV_RGB2GRAY);
   
-  // Declare Keypoints, Descriptors and SURF detector
+  // Keypoints and Descriptors
+  // With this method keypoints and descriptors should NOT be declared in loop
   std::vector<KeyPoint> keypoints_roi, keypoints_frame;
   Mat descriptors_roi, descriptors_frame; // NOT A VECTOR !!
-    
   Ptr<SURF> s_detector = SURF::create(400);
-    
+
   // Wait for key press to start computation
   waitKey(0);
 
@@ -63,9 +63,13 @@ int main()
 
     imshow("Frame", grayscale_frame);
 
-	// Detect and Compute using SURF.
-    s_detector->detect(img_roi, keypoints_roi);
-    s_detector->compute(img_roi, keypoints_roi, descriptors_roi);
+    // Detect Keypoints using SURF
+    
+    if (frame_num == 0) {
+		s_detector->detect(img_roi, keypoints_roi);
+		s_detector->compute(img_roi, keypoints_roi, descriptors_roi);
+		frame_num = 1;
+	}
     
     s_detector->detect(grayscale_frame, keypoints_frame);
     s_detector->compute(grayscale_frame, keypoints_frame, descriptors_frame);
@@ -73,7 +77,7 @@ int main()
     // Matching using FLANN
     FlannBasedMatcher matcher;
     vector< DMatch > matches;
-    matcher.match( descriptors_roi, descriptors_frame, matches);
+    matcher.match(descriptors_roi, descriptors_frame, matches);
     
     // Draw matches
     Mat img_match;
@@ -86,7 +90,6 @@ int main()
     std::vector<Point2f> roi_pts;
     std::vector<Point2f> frame_pts;
 
-	// Get the keypoints from matches only
     for( size_t i = 0; i < matches.size(); i++ ) {
         roi_pts.push_back(keypoints_roi[matches[i].queryIdx].pt);
         frame_pts.push_back(keypoints_frame[matches[i].trainIdx].pt);
@@ -123,6 +126,9 @@ int main()
     if (c == 27)
       break;
 
+	img_roi = grayscale_frame;
+	keypoints_roi = keypoints_frame;
+	descriptors_roi = descriptors_frame;
     frame_num++;
   }
 
