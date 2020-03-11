@@ -1,3 +1,14 @@
+/**
+ * @file tracking_roi.cpp
+ * @author Erwin lejeune (you@domain.com)
+ * @brief Select a tracking zone with mouse dragging, then press any key to start tracking
+ * @version 0.1
+ * @date 2020-03-11
+ * 
+ * @copyright Copyright (c) 2020
+ * 
+ */
+
 #include <iostream>
 #include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
