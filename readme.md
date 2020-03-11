@@ -1,6 +1,6 @@
 # Object Tracking
 
-Tracking a selected area ( tracking_roi.cpp ) or a hardcoded area for the provided video ( tracking.cpp ) using SURF detector and FLANN matchers.
+Tracking a selected area (tracking_roi.cpp) or a hardcoded area for the provided video (tracking.cpp) using SURF detector and FLANN matchers.
 
 ## Setup
 
@@ -9,7 +9,7 @@ To setup the project on your local machine:
 1. Click on `Fork`.
 2. Go to your fork and `clone` the project to your local machine.
 3. `git clone https://github.com/master-coro/cv-object-tracking`
-4. Make sure you installed opencv. ( Just clone opencv and opencv-contrib, make sure you modify the cmake list to change nonfree sources to ON, then configure cmake and build. Tutorials easily found online. )
+4. Make sure you installed opencv. Clone opencv and opencv-contrib, make sure you modify the cmake list to change nonfree sources to ON, then configure cmake and build. Tutorials easily found online.
 
 ## Run
 
