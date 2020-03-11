@@ -42,7 +42,7 @@ int main()
 
   // Convert in Grayscale without showing
   Mat img_roi = frame(roi);
-  cvtColor(img_roi, img_roi, CV_RGB2GRAY);
+  cvtColor(img_roi, img_roi, COLOR_RGB2GRAY);
   
   // Keypoints and Descriptors
   // With this method keypoints and descriptors should NOT be declared in loop
@@ -59,7 +59,7 @@ int main()
 	
     Mat grayscale_frame = frame.clone();
 
-    cvtColor(frame, grayscale_frame, CV_RGB2GRAY);
+    cvtColor(frame, grayscale_frame, COLOR_RGB2GRAY);
 
     imshow("Frame", grayscale_frame);
 
@@ -96,14 +96,14 @@ int main()
     }
 
 	// Find homography 
-    Mat homography = findHomography(roi_pts, frame_pts, CV_RANSAC);
+    Mat homography = findHomography(roi_pts, frame_pts, RANSAC);
 
     // Get ROI corners ( easy after cropping in the first place )
     std::vector<Point2f> roi_corners(4);
-    roi_corners[0] = cvPoint(0,0); 
-    roi_corners[1] = cvPoint(img_roi.cols, 0);
-    roi_corners[2] = cvPoint(img_roi.cols, img_roi.rows); 
-    roi_corners[3] = cvPoint(0, img_roi.rows);
+    roi_corners[0] = Point(0,0); 
+    roi_corners[1] = Point(img_roi.cols, 0);
+    roi_corners[2] = Point(img_roi.cols, img_roi.rows); 
+    roi_corners[3] = Point(0, img_roi.rows);
     std::vector<Point2f> frame_corners(4);
     
     perspectiveTransform(roi_corners, frame_corners, homography);

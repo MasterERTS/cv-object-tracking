@@ -1,15 +1,32 @@
+#include <iostream>
 #include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
+#ifdef HAVE_OPENCV_XFEATURES2D
 #include "opencv2/highgui.hpp"
-#include <iostream>
+#include "opencv2/features2d.hpp"
+#include "opencv2/xfeatures2d.hpp"
+
+#if MXNET_USE_OPENCV
+#include <opencv2/opencv.hpp>
++ #include<opencv2 / imgproc / types_c.h>
+#endif // MXNET_USE_OPENCV
+
+#if MXNET_USE_OPENCV
+#include <opencv2/opencv.hpp>
+    + #include<opencv2 / imgproc / types_c.h>
+#include // NOLINT()
+#include // NOLINT()
+#include // NOLINT(*)
+#endif
 
 using namespace std;
 using namespace cv;
+using namespace cv::xfeatures2d;
 
 Mat frame;
 
 bool drag = false;
-Rect tracking;
+Rect roi;
 Point point1;
 Point point2;
 
@@ -32,7 +49,7 @@ void mouse(int event, int x, int y, int flags, void* param)
     {
         point2 = Point(x, y);
         drag = 0;
-        tracking = Rect(point1.x, point1.y, x - point1.x, y - point1.y);
+        roi = Rect(point1.x, point1.y, x - point1.x, y - point1.y);
     }
     if (event == CV_EVENT_LBUTTONUP)
     {
@@ -96,3 +113,13 @@ int main()
 
     return 0;
 }
+
+#else
+
+// Used this because I couldn't figure out why it didn't work on my personal computer. It highlighted the problem.
+int main()
+{
+  std::cout << "You need the xfeatures2d module to run this program" << std::endl;
+}
+
+#endif
