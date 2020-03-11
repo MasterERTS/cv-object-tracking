@@ -19,7 +19,7 @@
 #include // NOLINT(*)
 #endif
 
-using namespace std;
+    using namespace std;
 using namespace cv;
 using namespace cv::xfeatures2d;
 
@@ -31,32 +31,31 @@ Point point1;
 Point point2;
 
 // If Bounding Box defined by mouse
-void mouse(int event, int x, int y, int flags, void* param)
+void mouse(int event, int x, int y, int flags, void *param)
 {
-    if (event == CV_EVENT_LBUTTONDOWN && !drag)
+    if (event == EVENT_LBUTTONDOWN && !drag)
     {
         point1 = Point(x, y);
         drag = 1;
     }
-    if (event == CV_EVENT_MOUSEMOVE && drag)
+    if (event == EVENT_MOUSEMOVE && drag)
     {
         Mat img = frame.clone();
         point2 = Point(x, y);
         rectangle(img, point1, point2, Scalar(0, 0, 255), 1, 8, 0);
         imshow("Frame", img);
     }
-    if (event == CV_EVENT_LBUTTONUP && drag)
+    if (event == EVENT_LBUTTONUP && drag)
     {
         point2 = Point(x, y);
         drag = 0;
         roi = Rect(point1.x, point1.y, x - point1.x, y - point1.y);
     }
-    if (event == CV_EVENT_LBUTTONUP)
+    if (event == EVENT_LBUTTONUP)
     {
         drag = 0;
     }
 }
-
 
 int main()
 {
@@ -84,17 +83,88 @@ int main()
     // Display the resulting frame
     imshow("Frame", frame);
 
-    cvSetMouseCallback("Frame", mouse, NULL);
+    setMouseCallback("Frame", mouse, NULL);
 
+    waitKey(0);
+
+    // Convert in Grayscale without showing
+    Mat img_roi = frame(roi);
+    //imshow("Roi", img_roi);
+    cvtColor(img_roi, img_roi, COLOR_RGB2GRAY);
+
+    // Declare Keypoints, Descriptors and SURF detector
+    std::vector<KeyPoint> keypoints_roi, keypoints_frame;
+    Mat descriptors_roi, descriptors_frame; // NOT A VECTOR !!
+
+    Ptr<SURF> s_detector = SURF::create(400);
+
+    // Wait for key press to start computation
     waitKey(0);
 
     while (1)
     {
-
         cap >> frame;
 
+        Mat grayscale_frame = frame.clone();
+
+        cvtColor(frame, grayscale_frame, COLOR_RGB2GRAY);
+
+        imshow("Frame", grayscale_frame);
+
+        // Detect and Compute using SURF.
+        s_detector->detect(img_roi, keypoints_roi);
+        s_detector->compute(img_roi, keypoints_roi, descriptors_roi);
+
+        s_detector->detect(grayscale_frame, keypoints_frame);
+        s_detector->compute(grayscale_frame, keypoints_frame, descriptors_frame);
+
+        // Matching using FLANN
+        FlannBasedMatcher matcher;
+        vector<DMatch> matches;
+        matcher.match(descriptors_roi, descriptors_frame, matches);
+
+        // Draw matches
+        Mat img_match;
+        drawMatches(img_roi, keypoints_roi, grayscale_frame, keypoints_frame, matches, img_match);
+
+        imshow("Matches", img_match);
+
+        // Get all keypoints that are good matches
+
+        std::vector<Point2f> roi_pts;
+        std::vector<Point2f> frame_pts;
+
+        // Get the keypoints from matches only
+        for (size_t i = 0; i < matches.size(); i++)
+        {
+            roi_pts.push_back(keypoints_roi[matches[i].queryIdx].pt);
+            frame_pts.push_back(keypoints_frame[matches[i].trainIdx].pt);
+        }
+
+        // Find homography
+        Mat homography = findHomography(roi_pts, frame_pts, RANSAC);
+
+        // Get ROI corners ( easy after cropping in the first place )
+        std::vector<Point2f> roi_corners(4);
+        roi_corners[0] = Point(0, 0);
+        roi_corners[1] = Point(img_roi.cols, 0);
+        roi_corners[2] = Point(img_roi.cols, img_roi.rows);
+        roi_corners[3] = Point(0, img_roi.rows);
+        std::vector<Point2f> frame_corners(4);
+
+        perspectiveTransform(roi_corners, frame_corners, homography);
+
+        // Draw lines between corners
+        line(img_match, frame_corners[0] + Point2f(img_roi.cols, 0), frame_corners[1] + Point2f(img_roi.cols, 0), Scalar(0, 0, 255), 4);
+        line(img_match, frame_corners[1] + Point2f(img_roi.cols, 0), frame_corners[2] + Point2f(img_roi.cols, 0), Scalar(0, 0, 255), 4);
+        line(img_match, frame_corners[2] + Point2f(img_roi.cols, 0), frame_corners[3] + Point2f(img_roi.cols, 0), Scalar(0, 0, 255), 4);
+        line(img_match, frame_corners[3] + Point2f(img_roi.cols, 0), frame_corners[0] + Point2f(img_roi.cols, 0), Scalar(0, 0, 255), 4);
+
+        //-- Show detected matches
+        imshow("Matches & Object detection", img_match);
+
         // If the frame is empty, break immediately
-        if (frame.empty())
+        if (frame.empty() or img_match.empty())
             break;
 
         // Press  ESC on keyboard to exit
@@ -119,7 +189,7 @@ int main()
 // Used this because I couldn't figure out why it didn't work on my personal computer. It highlighted the problem.
 int main()
 {
-  std::cout << "You need the xfeatures2d module to run this program" << std::endl;
+    std::cout << "You need the xfeatures2d module to run this program" << std::endl;
 }
 
 #endif
