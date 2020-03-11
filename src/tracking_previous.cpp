@@ -1,3 +1,14 @@
+/**
+ * @file tracking_previous.cpp
+ * @author Erwin lejeune (you@domain.com)
+ * @brief track a hardcoded object first, then match points with previous frame
+ * @version 0.1
+ * @date 2020-03-11
+ * 
+ * @copyright Copyright (c) 2020
+ * 
+ */
+
 #include <iostream>
 #include "opencv2/opencv.hpp"
 #include "opencv2/core.hpp"
