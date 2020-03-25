@@ -7,5 +7,7 @@ add_executable( tracking_previous src/tracking_previous.cpp )
 target_link_libraries( tracking_previous ${OpenCV_LIBS} )
 add_executable( tracking_custom src/tracking_roi.cpp )
 target_link_libraries( tracking_custom ${OpenCV_LIBS} )
+add_executable( tracking_webcam src/tracking_webcam.cpp )
+target_link_libraries( tracking_webcam ${OpenCV_LIBS} )
 
 

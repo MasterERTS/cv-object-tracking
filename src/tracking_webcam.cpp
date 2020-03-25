@@ -1,7 +1,7 @@
 /**
- * @file tracking_roi.cpp
+ * @file tracking_webcam.cpp
  * @author Erwin lejeune (you@domain.com)
- * @brief Select a tracking zone with mouse dragging, then press any key to start tracking
+ * @brief Select a tracking zone from the webcam stream with mouse dragging, then press any key to start tracking
  * @version 0.1
  * @date 2020-03-11
  * 
@@ -73,7 +73,7 @@ int main()
 
     // Create a VideoCapture object and open the input file
     // If the input is the web camera, pass 0 instead of the video file name
-    VideoCapture cap("../res/video1.mp4");
+    VideoCapture cap("/dev/video0");
 
     // Check if camera opened successfully
     if (!cap.isOpened())
