@@ -75,7 +75,7 @@ int main()
 
     // Create a VideoCapture object and open the input file
     // If the input is the web camera, pass 0 instead of the video file name
-    VideoCapture cap("/dev/video0");
+    VideoCapture cap(0);
     Mat img_roi;
     bool tracking_ready = false;
     bool roi_ready = false;
