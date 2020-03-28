@@ -33,8 +33,6 @@
 * [About the Project](#about-the-project)
 * [Setup](#setup)
 * [Run](#run)
-  * [Reactive](#reactive-navigation)
-  * [Teleoperation](#teleoperation)
 * [Roadmap](#roadmap)
 * [Contribute](#contribute)
 * [License](#license)
